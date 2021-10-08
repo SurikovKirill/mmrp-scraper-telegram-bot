@@ -1,33 +1,32 @@
 package main
 
-import (
-	tgbotapi "github.com/Syfaro/telegram-bot-api"
-	"log"
-)
+import "mmrp-scraper/internal/scrapers"
 
 func main() {
-	bot, err := tgbotapi.NewBotAPI("2060850344:AAHpEc_-JdkYdbP_p0ZoUSMC8-U0mv3_a8c")
-	if err != nil {
-		log.Panic(err)
-	}
-
-	bot.Debug = true
-	updateConfig := tgbotapi.NewUpdate(0)
-	updateConfig.Timeout = 30
-
-	// Start polling
-	updates, _ := bot.GetUpdatesChan(updateConfig)
-
-	for update := range updates {
-		if update.Message == nil {
-			continue
-		}
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		msg.ReplyToMessageID = update.Message.MessageID
-		if _, err := bot.Send(msg); err != nil {
-			panic(err)
-		}
-	}
+	scrap := scrapers.MMRPScraper{}
+	scrap.Scrape()
+	//bot, err := tgbotapi.NewBotAPI("2060850344:AAHpEc_-JdkYdbP_p0ZoUSMC8-U0mv3_a8c")
+	//if err != nil {
+	//	log.Panic(err)
+	//}
+	//
+	//bot.Debug = true
+	//updateConfig := tgbotapi.NewUpdate(0)
+	//updateConfig.Timeout = 30
+	//
+	//// Start polling
+	//updates, _ := bot.GetUpdatesChan(updateConfig)
+	//
+	//for update := range updates {
+	//	if update.Message == nil {
+	//		continue
+	//	}
+	//	msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+	//	msg.ReplyToMessageID = update.Message.MessageID
+	//	if _, err := bot.Send(msg); err != nil {
+	//		panic(err)
+	//	}
+	//}
 }
 
 //c := colly.NewCollector()
