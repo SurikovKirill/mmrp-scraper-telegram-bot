@@ -6,6 +6,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"log"
 	"net/http"
+	"strings"
 )
 
 // MMRPScraper ...
@@ -48,9 +49,18 @@ func (s *MMRPScraper) Scrape() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		metadata := data.Find(".col-lg-12").Find("b").Text()
+		//metadata, _ := data.Find(".col-lg-12").Not(".breadcrumb").Html()
+		//.Find("b").Text()
+		metadata1 := data.Find(".container.content").Find(".container.full-width").Find(".col-lg-12").Has(".container.full-width").Find(".date-news").Text()
 
-		fmt.Println(metadata)
+		arriving := strings.ReplaceAll(metadata1, "\t", "")
+		metadata2 := data.Find(".container.content").Find(".col-lg-12").Has("br").Text()
+		dataset := strings.ReplaceAll(metadata2, "\t", "")
+		//if err != nil {
+		//	log.Fatal(err)
+		//}
+		fmt.Println(arriving)
+		fmt.Println(dataset)
 		//notify user
 	}
 }
