@@ -11,7 +11,6 @@ import (
 
 // MMRPScraper ...
 type MMRPScraper struct {
-	//config *Config
 	lastArrivalCheckSum string
 }
 
@@ -49,13 +48,33 @@ func (s *MMRPScraper) Scrape() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		metadata1 := data.Find(".container.content").Find(".container.full-width").Find(".col-lg-12").Has(".container.full-width").Find(".date-news").Text()
+		//Getting date
+		arriving := strings.ReplaceAll(strings.ReplaceAll(data.Find(".date-news").Text(), "\t", ""), "\n", "")
 
-		arriving := strings.ReplaceAll(metadata1, "\t", "")
-		metadata2 := data.Find(".container.content").Find(".col-lg-12").Has("br").Text()
-		dataset := strings.ReplaceAll(metadata2, "\t", "")
+		//Getting headings
+		var headings []string
+		data.Find(".container.content").Find(".col-lg-12").Has("b").Find("b").Each(func(i int, s *goquery.Selection) {
+			headings = append(headings, s.Text())
+		})
+
+		metadata := data.Find(".container.content").Find(".col-lg-12").Has("b").Text()
+
+		//metadata = strings.ReplaceAll(metadata,"\t","")
+		//spl := strings.Split(metadata, "\n")
+		//for i, _ := range spl{
+		//	spl[i] = strings.ReplaceAll(spl[i], "\n", "")
+		//}
+		//metadata = strings.ReplaceAll(metadata, "\t", "")
+		//metadata = strings.ReplaceAll(metadata, "\n", "")
+		//spl := strings.Split(metadata, "  ")
+		//fmt.Println(spl)
+		//metadata = strings.ReplaceAll(metadata, "\t", "")
+		//metadata = strings.ReplaceAll(metadata, "\n", "")
+		//metad, _ := data.Find(".container.content").Find(".col-lg-12").Has("b").NotSelection(metadata).Html()
+
 		fmt.Println(arriving)
-		fmt.Println(dataset)
+		fmt.Println(headings)
+		fmt.Println(metadata)
 		//notify user
 	}
 }
