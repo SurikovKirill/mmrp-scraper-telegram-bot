@@ -57,10 +57,19 @@ func (s *MMRPScraper) Scrape() {
 			headings = append(headings, s.Text())
 		})
 
-		metadata := data.Find(".container.content").Find(".col-lg-12").Has("b").Text()
+		metadata := strings.ReplaceAll(data.Find(".container.content").Find(".col-lg-12").Has("b").Text(), "\t", "")
+		for i := range headings {
+			metadata = strings.ReplaceAll(metadata, headings[i], "")
+		}
+		metadata = strings.ReplaceAll(metadata, arriving, "")
+		metadata = strings.TrimSpace(metadata)
+		metadata = strings.ReplaceAll(metadata, " \n ", "")
+		spl := strings.Split(metadata, "\n")
 
-		//metadata = strings.ReplaceAll(metadata,"\t","")
-		//spl := strings.Split(metadata, "\n")
+		for i := range spl {
+			spl[i] = strings.TrimSpace(spl[i])
+		}
+		fmt.Println(spl)
 		//for i, _ := range spl{
 		//	spl[i] = strings.ReplaceAll(spl[i], "\n", "")
 		//}
