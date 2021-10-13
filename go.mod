@@ -15,6 +15,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/jawher/mow.cli v1.2.0 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/temoto/robotstxt v1.1.2 // indirect
@@ -22,4 +23,5 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
+	gopkg.in/tucnak/telebot.v2 v2.4.0 // indirect
 )
