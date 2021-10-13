@@ -15,6 +15,10 @@ type MMRPScraper struct {
 	lastArrivalCheckSum string
 }
 
+func (s *MMRPScraper) GetDocument(url string) {
+
+}
+
 func (s *MMRPScraper) Scrape() {
 	//Initialize document
 	res, err := http.Get("http://mmrp.ru/news/74/")

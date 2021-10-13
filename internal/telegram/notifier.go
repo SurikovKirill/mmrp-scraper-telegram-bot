@@ -13,10 +13,7 @@ const (
 	url    = "https://api.telegram.org/bot"
 )
 
-type BotSendMessageId struct {
-	Result struct {
-		Message_id int
-	}
+type MMRPBot struct {
 }
 
 func SendMessage() {
@@ -24,12 +21,9 @@ func SendMessage() {
 	data := []byte(fmt.Sprintf(`{"chat_id": %d, "text": "clap"}`, chatId))
 	fmt.Println(string(data))
 	tx := bytes.NewReader(data)
-	res, err := http.Post(fmt.Sprintf("%s%s/sendMessage", url, token), "application/json", tx)
+	_, err := http.Post(fmt.Sprintf("%s%s/sendMessage", url, token), "application/json", tx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(res.Status)
-	fmt.Println(res.Body)
-	fmt.Println(res.Request)
 
 }
