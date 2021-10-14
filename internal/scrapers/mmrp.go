@@ -15,13 +15,11 @@ type MMRPScraper struct {
 	lastArrivalCheckSum string
 }
 
-func (s *MMRPScraper) Scrape() {
-	//Initialize document
-	res, err := http.Get("http://mmrp.ru/news/74/")
+func GetDocument(url string) *goquery.Document {
+	res, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer res.Body.Close()
 	if res.StatusCode != 200 {
 		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 	}
@@ -29,52 +27,57 @@ func (s *MMRPScraper) Scrape() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	return doc
+}
+
+func (s *MMRPScraper) Scrape() {
+	//Initialize main document
+	doc := GetDocument("http://mmrp.ru/news/74/")
+
 	// Searching the last report
+	fmt.Println("searching new report")
 	a, _ := doc.Find(".row").Find(".t_1").First().Find("a").Attr("href")
+	fmt.Println(a)
 	checksum := fmt.Sprintf("%x", md5.Sum([]byte(a)))
 
 	// Extracting data if report is new, make new checksum
 	if s.lastArrivalCheckSum != checksum {
 		s.lastArrivalCheckSum = checksum
-		link := fmt.Sprintf("http://mmrp.ru%s", a)
-		resp, err := http.Get(link)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode != 200 {
-			log.Fatalf("status code error: %d %s", resp.StatusCode, resp.Status)
-		}
-		data, err := goquery.NewDocumentFromReader(resp.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
+		fmt.Println("New report!!!")
+		reportDoc := GetDocument(fmt.Sprintf("http://mmrp.ru%s", a))
 
 		//Getting date of report
-		dateReport := strings.ReplaceAll(strings.ReplaceAll(data.Find(".date-news").Text(), "\t", ""), "\n", "")
+		dateReport := strings.ReplaceAll(strings.ReplaceAll(reportDoc.Find(".date-news").Text(), "\t", ""), "\n", "")
 
 		//Extracting headings
-		var headings []string
-		data.Find(".container.content").Find(".col-lg-12").Has("b").Find("b").Each(func(i int, s *goquery.Selection) {
-			headings = append(headings, s.Text())
+		var headers []string
+		reportDoc.Find(".container.content").Find(".col-lg-12").Has("b").Find("b").Each(func(i int, s *goquery.Selection) {
+			headers = append(headers, strings.TrimSpace(s.Text()))
 		})
 
 		//Extracting metadata
-		metadata := strings.ReplaceAll(data.Find(".container.content").Find(".col-lg-12").Has("b").Text(), "\t", "")
-		for i := range headings {
-			metadata = strings.ReplaceAll(metadata, headings[i], "")
+		data := reportDoc.Find(".container.content").Find(".col-lg-12").Has("b").Text()
+
+		//Cleaning off duplicate data
+		for i := range headers {
+			data = strings.ReplaceAll(data, headers[i], "")
 		}
-		metadata = strings.ReplaceAll(metadata, dateReport, "")
-		metadata = strings.TrimSpace(metadata)
-		metadata = strings.ReplaceAll(metadata, " \n ", "")
-		spl := strings.Split(metadata, "\n")
+		data = strings.ReplaceAll(data, dateReport, "")
+
+		//Cleaning off spaces and split data
+		spl := strings.Split(strings.ReplaceAll(strings.TrimSpace(data), " \n ", ""), "\n")
 		for i := range spl {
 			spl[i] = strings.TrimSpace(spl[i])
+			spl[i] = strings.ReplaceAll(spl[i], "\"", "\\\"")
 		}
-		fmt.Println("Nofify")
-		telegram.SendMessage()
 
-		//notify user
+		//Mapping data
+		m := make(map[string]string)
+		for i, val := range headers {
+			m[val] = spl[i]
+		}
+
+		telegram.SendMessage(dateReport, m)
 
 	}
 }
