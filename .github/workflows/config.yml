@@ -18,5 +18,11 @@ jobs:
         with:
           go-version: 1.17
 
+      - name: Set up dep
+        run: go get github.com/PuerkitoBio/goquery
+
+      - name: Set up depend
+        run: go get github.com/go-co-op/gocron
+
       - name: Build
         run: go build mmrp-scraper/cmd/mmrp
