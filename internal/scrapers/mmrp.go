@@ -4,23 +4,21 @@ import (
 	"crypto/md5"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"log"
-	"net/http"
+	"mmrp-scraper/internal/telegram"
 	"strings"
 )
 
 // MMRPScraper ...
 type MMRPScraper struct {
-	//config *Config
 	lastArrivalCheckSum string
 }
 
-func (s *MMRPScraper) Scrape() {
-	res, err := http.Get("http://mmrp.ru/news/74/")
+
+func GetDocument(url string) *goquery.Document {
+	res, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer res.Body.Close()
 	if res.StatusCode != 200 {
 		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 	}
@@ -29,33 +27,56 @@ func (s *MMRPScraper) Scrape() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	return doc
+}
 
+func (s *MMRPScraper) Scrape() {
+	//Initialize main document
+	doc := GetDocument("http://mmrp.ru/news/74/")
+
+	// Searching the last report
+	fmt.Println("searching new report")
 	a, _ := doc.Find(".row").Find(".t_1").First().Find("a").Attr("href")
+	fmt.Println(a)
 	checksum := fmt.Sprintf("%x", md5.Sum([]byte(a)))
+
+	// Extracting data if report is new, make new checksum
 	if s.lastArrivalCheckSum != checksum {
 		s.lastArrivalCheckSum = checksum
-		link := fmt.Sprintf("http://mmrp.ru%s", a)
-		fmt.Println(link)
-		resp, err := http.Get(link)
-		if err != nil {
-			log.Fatal(err)
+		fmt.Println("New report!!!")
+		reportDoc := GetDocument(fmt.Sprintf("http://mmrp.ru%s", a))
+
+		//Getting date of report
+		dateReport := strings.ReplaceAll(strings.ReplaceAll(reportDoc.Find(".date-news").Text(), "\t", ""), "\n", "")
+
+		//Extracting headings
+		var headers []string
+		reportDoc.Find(".container.content").Find(".col-lg-12").Has("b").Find("b").Each(func(i int, s *goquery.Selection) {
+			headers = append(headers, strings.TrimSpace(s.Text()))
+		})
+
+		//Extracting metadata
+		data := reportDoc.Find(".container.content").Find(".col-lg-12").Has("b").Text()
+
+		//Cleaning off duplicate data
+		for i := range headers {
+			data = strings.ReplaceAll(data, headers[i], "")
 		}
-		defer resp.Body.Close()
-		if resp.StatusCode != 200 {
-			log.Fatalf("status code error: %d %s", resp.StatusCode, resp.Status)
+		data = strings.ReplaceAll(data, dateReport, "")
+
+		//Cleaning off spaces and split data
+		spl := strings.Split(strings.ReplaceAll(strings.TrimSpace(data), " \n ", ""), "\n")
+		for i := range spl {
+			spl[i] = strings.TrimSpace(spl[i])
+			spl[i] = strings.ReplaceAll(spl[i], "\"", "\\\"")
 		}
 
-		data, err := goquery.NewDocumentFromReader(resp.Body)
-		if err != nil {
-			log.Fatal(err)
+		//Mapping data
+		m := make(map[string]string)
+		for i, val := range headers {
+			m[val] = spl[i]
 		}
-		metadata1 := data.Find(".container.content").Find(".container.full-width").Find(".col-lg-12").Has(".container.full-width").Find(".date-news").Text()
 
-		arriving := strings.ReplaceAll(metadata1, "\t", "")
-		metadata2 := data.Find(".container.content").Find(".col-lg-12").Has("br").Text()
-		dataset := strings.ReplaceAll(metadata2, "\t", "")
-		fmt.Println(arriving)
-		fmt.Println(dataset)
-		//notify user
+		telegram.SendMessage(dateReport, m)
 	}
 }
