@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 )
 
 // TODO: make text of the message pretty
@@ -43,4 +44,15 @@ func SendMessage(s string, d map[string]string) {
 		log.Fatal(err)
 	}
 
+}
+
+func SendDocument(link string) {
+	fmt.Println("create answer")
+	fmt.Println(link)
+	b := []byte(fmt.Sprintf(`{"chat_id": %d, "text": "%s"}`, chatId, strings.TrimSpace(link)))
+	tx := bytes.NewReader(b)
+	_, err := http.Post(fmt.Sprintf("%s%s/sendMessage", url, token), "application/json", tx)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

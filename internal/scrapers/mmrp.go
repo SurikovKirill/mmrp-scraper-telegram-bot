@@ -4,9 +4,7 @@ import (
 	"crypto/md5"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"log"
 	"mmrp-scraper/internal/telegram"
-	"net/http"
 	"strings"
 )
 
