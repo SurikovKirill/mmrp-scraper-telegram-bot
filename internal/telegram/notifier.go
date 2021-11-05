@@ -56,3 +56,4 @@ func SendDocument(link string) {
 		log.Fatal(err)
 	}
 }
+

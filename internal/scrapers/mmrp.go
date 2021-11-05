@@ -22,6 +22,7 @@ func GetDocument(url string) *goquery.Document {
 	if res.StatusCode != 200 {
 		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 	}
+
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
 		log.Fatal(err)
@@ -77,6 +78,5 @@ func (s *MMRPScraper) Scrape() {
 		}
 
 		telegram.SendMessage(dateReport, m)
-
 	}
 }
