@@ -13,6 +13,7 @@ type MMRPScraper struct {
 	lastArrivalCheckSum string
 }
 
+
 func GetDocument(url string) *goquery.Document {
 	res, err := http.Get(url)
 	if err != nil {
