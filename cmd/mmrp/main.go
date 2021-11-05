@@ -2,13 +2,9 @@ package main
 
 import (
 	"github.com/go-co-op/gocron"
-	"time"
-
-	//"github.com/go-co-op/gocron"
-	//"log"
 	"log"
 	"mmrp-scraper/internal/scrapers"
-	//"time"
+	"time"
 )
 
 func main() {
