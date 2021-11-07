@@ -3,6 +3,7 @@ package scrapers
 import (
 	"crypto/md5"
 	"fmt"
+	"log"
 	"mmrp-scraper/internal/telegram"
 )
 
@@ -12,7 +13,11 @@ type MAPMScraper struct {
 }
 
 func (s *MAPMScraper) Scrape() {
-	doc := GetDocument("http://mapm.ru/Port/Murmansk")
+	cfg, err := Init()
+	if err != nil {
+		log.Fatal(err)
+	}
+	doc := GetDocument(fmt.Sprintf("%s/Port/Murmansk", cfg.MapmUrl))
 	fmt.Println("searching new report")
 	text := doc.Find(".text-success").Text()
 	fmt.Println(text)
@@ -21,6 +26,6 @@ func (s *MAPMScraper) Scrape() {
 		s.lastArrivalCheckSum = checksum
 		link, _ := doc.Find(".text-success").Attr("href")
 		fmt.Println(link)
-		telegram.SendDocument(fmt.Sprintf("http://mapm.ru%s", link))
+		telegram.SendDocument(fmt.Sprintf("%s%s", cfg.MapmUrl, link))
 	}
 }

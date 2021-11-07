@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"log"
 	"mmrp-scraper/internal/telegram"
 	"strings"
 )
@@ -14,8 +15,13 @@ type MMRPScraper struct {
 }
 
 func (s *MMRPScraper) Scrape() {
+	cfg, err := Init()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	//Initialize main document
-	doc := GetDocument("http://mmrp.ru/news/74/")
+	doc := GetDocument(fmt.Sprintf("%s/news/74/", cfg.MmrpUrl))
 
 	// Searching the last report
 	fmt.Println("searching new report")
@@ -27,7 +33,7 @@ func (s *MMRPScraper) Scrape() {
 	if s.lastArrivalCheckSum != checksum {
 		s.lastArrivalCheckSum = checksum
 		fmt.Println("New report!!!")
-		reportDoc := GetDocument(fmt.Sprintf("http://mmrp.ru%s", a))
+		reportDoc := GetDocument(fmt.Sprintf("%s%s", cfg.MmrpUrl, a))
 
 		//Getting date of report
 		dateReport := strings.ReplaceAll(strings.ReplaceAll(reportDoc.Find(".date-news").Text(), "\t", ""), "\n", "")
