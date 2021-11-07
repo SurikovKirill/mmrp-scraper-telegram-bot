@@ -5,6 +5,7 @@ RUN go version
 COPY . /mmrp-scraper/
 WORKDIR /mmrp-scraper/
 
+RUN go mod tidy
 RUN go mod download
 RUN GOOS=linux go build -o ./.bin/bot ./cmd/mmrp/main.go
 
