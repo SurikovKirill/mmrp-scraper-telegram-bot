@@ -1,28 +1,62 @@
-name: Go
+name: CI
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches:
+      - master
+
+env:
+  REGISTRY: "registry.digitalocean.com/sandbox-registry"
+  IMAGE_NAME: "telegram-bot-notifier"
+  CONTAINER_NAME: "notifier"
 
 jobs:
-
-  build:
+  build_and_push:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout master
+        uses: actions/checkout@v2
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
+      - name: Build container image
+        run: docker build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
         with:
-          go-version: 1.17
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-      - name: Set up dep
-        run: go get github.com/PuerkitoBio/goquery
+      - name: Log in to DigitalOcean Container Registry with short-lived credentials
+        run: doctl registry login --expiry-seconds 600
 
-      - name: Set up depend
-        run: go get github.com/go-co-op/gocron
+      - name: Push image to DigitalOcean Container Registry
+        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
 
-      - name: Build
-        run: go build mmrp-scraper/cmd/mmrp
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build_and_push
+
+    steps:
+      - name: Deploy to Digital Ocean droplet via SSH action
+        uses: appleboy/ssh-action@v0.1.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          envs: IMAGE_NAME,REGISTRY,GITHUB_SHA,,CONTAINER_NAME
+          script: |
+            # Login into Digital Ocean Registry
+            docker login -u ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} -p ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} $(echo $REGISTRY)
+            # Stop running container
+            docker stop $(echo $CONTAINER_NAME)
+            # Remove old container
+            docker rm $(echo $CONTAINER_NAME)
+            # Set env variables
+            export TOKEN=${{ secrets.TELEGRAM_TOKEN }}
+            export CHAT_ID=${{ secrets.CHAT_ID }}
+            # Run a new container from a new image
+            docker run -e TOKEN -e CHAT_ID -d \
+            --restart always \
+            --publish 80:80 \
+            --name $(echo $CONTAINER_NAME) \
+            $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
