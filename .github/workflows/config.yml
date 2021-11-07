@@ -6,7 +6,7 @@ on:
       - master
 
 env:
-  REGISTRY: "registry.digitalocean.com/sandbox-registry"
+  REGISTRY: "registry.digitalocean.com/telegram-bot-notifier"
   IMAGE_NAME: "telegram-bot-notifier"
   CONTAINER_NAME: "notifier"
 
