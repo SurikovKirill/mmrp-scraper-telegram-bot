@@ -28,6 +28,7 @@ func (s *MMRPScraper) Scrape(cfg Config) {
 
 	// Searching the last report
 	a, _ := doc.Find(".row").Find(".t_1").First().Find("a").Attr("href")
+	fmt.Println(a)
 	checksum := fmt.Sprintf("%x", md5.Sum([]byte(a)))
 
 	// Extracting data if report is new, make new checksum
