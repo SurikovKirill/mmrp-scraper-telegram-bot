@@ -7,6 +7,7 @@ import (
 	"log"
 	"mmrp-scraper/internal/telegram"
 	"strings"
+	"sync"
 )
 
 // MMRPScraper ...
@@ -14,25 +15,26 @@ type MMRPScraper struct {
 	lastArrivalCheckSum string
 }
 
-func (s *MMRPScraper) Scrape() {
-	cfg, err := Init()
-	if err != nil {
-		log.Fatal(err)
-	}
+func (s *MMRPScraper) Scrape(cfg Config) {
+	//Initialize checksum from file
+	var once sync.Once
+	once.Do(func() {
+		s.lastArrivalCheckSum = ReadCheckSum("./.checksum_mmrp")
+		log.Println("Checksum for MMRP has been read")
+	})
 
 	//Initialize main document
 	doc := GetDocument(fmt.Sprintf("%s/news/74/", cfg.MmrpUrl))
 
 	// Searching the last report
-	fmt.Println("searching new report")
 	a, _ := doc.Find(".row").Find(".t_1").First().Find("a").Attr("href")
-	fmt.Println(a)
 	checksum := fmt.Sprintf("%x", md5.Sum([]byte(a)))
 
 	// Extracting data if report is new, make new checksum
 	if s.lastArrivalCheckSum != checksum {
+		log.Println("New report in MMRP")
 		s.lastArrivalCheckSum = checksum
-		fmt.Println("New report!!!")
+		SaveCheckSum(checksum, "./.checksum_mmrp")
 		reportDoc := GetDocument(fmt.Sprintf("%s%s", cfg.MmrpUrl, a))
 
 		//Getting date of report

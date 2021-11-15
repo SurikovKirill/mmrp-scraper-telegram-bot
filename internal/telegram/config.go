@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"github.com/spf13/viper"
+	"log"
 	"strconv"
 )
 
@@ -31,8 +32,7 @@ func Init() (*Config, error) {
 }
 
 func parseEnv(cfg *Config) error {
-	//os.Setenv("TOKEN", "2060850344:AAHpEc_-JdkYdbP_p0ZoUSMC8-U0mv3_a8c")
-	//os.Setenv("CHAT_ID", "-1001580808284")
+	log.Println("Parsing environments")
 	if err := viper.BindEnv("token"); err != nil {
 		return err
 	}

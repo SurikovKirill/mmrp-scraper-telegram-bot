@@ -1,6 +1,9 @@
 package scrapers
 
-import "github.com/spf13/viper"
+import (
+	"github.com/spf13/viper"
+	"log"
+)
 
 type Config struct {
 	MapmUrl string `mapstructure:"mapm_url"`
@@ -19,5 +22,6 @@ func Init() (*Config, error) {
 		return nil, err
 	}
 
+	log.Println("Successful config initialization for scrapers")
 	return &cfg, nil
 }
