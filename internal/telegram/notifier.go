@@ -11,12 +11,6 @@ import (
 // TODO: make text of the message pretty
 // TODO: add logger
 
-const (
-	chatId = -1001580808284
-	token  = "2060850344:AAHpEc_-JdkYdbP_p0ZoUSMC8-U0mv3_a8c"
-	url    = "https://api.telegram.org/bot"
-)
-
 type MMRPBot struct {
 }
 
@@ -30,30 +24,36 @@ func (t *Text) ToString() string {
 	for key, value := range t.data {
 		result += fmt.Sprintf("%s: %s \n", key, value)
 	}
-	fmt.Println(result)
 	return result
 }
 
 func SendMessage(s string, d map[string]string) {
-	fmt.Println("create answer")
-	t := Text{s, d}
-	b := []byte(fmt.Sprintf(`{"chat_id": %d, "text": "%s"}`, chatId, t.ToString()))
-	tx := bytes.NewReader(b)
-	_, err := http.Post(fmt.Sprintf("%s%s/sendMessage", url, token), "application/json", tx)
+	cfg, err := Init()
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	log.Println("Create answer")
+	t := Text{s, d}
+	b := []byte(fmt.Sprintf(`{"chat_id": %d, "text": "%s"}`, cfg.ChatId, t.ToString()))
+	tx := bytes.NewReader(b)
+	_, err = http.Post(fmt.Sprintf("%s%s/sendMessage", cfg.Url, cfg.Token), "application/json", tx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Successful message request")
 }
 
 func SendDocument(link string) {
-	fmt.Println("create answer")
-	fmt.Println(link)
-	b := []byte(fmt.Sprintf(`{"chat_id": %d, "text": "%s"}`, chatId, strings.TrimSpace(link)))
-	tx := bytes.NewReader(b)
-	_, err := http.Post(fmt.Sprintf("%s%s/sendMessage", url, token), "application/json", tx)
+	cfg, err := Init()
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println("Create answer")
+	b := []byte(fmt.Sprintf(`{"chat_id": %d, "text": "%s"}`, cfg.ChatId, strings.TrimSpace(link)))
+	tx := bytes.NewReader(b)
+	_, err = http.Post(fmt.Sprintf("%s%s/sendMessage", cfg.Url, cfg.Token), "application/json", tx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Successful document request")
 }
-

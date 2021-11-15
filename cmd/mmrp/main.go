@@ -16,10 +16,14 @@ func main() {
 func run() error {
 	s1 := scrapers.MMRPScraper{}
 	s2 := scrapers.MAPMScraper{}
+	cfg, err := scrapers.Init()
+	if err != nil {
+		log.Fatal(err)
+	}
 	scheduler := gocron.NewScheduler(time.UTC)
-	_, err := scheduler.Every(15).Minutes().Do(func() {
-		s1.Scrape()
-		s2.Scrape()
+	_, err = scheduler.Every(15).Minutes().Do(func() {
+		s1.Scrape(*cfg)
+		s2.Scrape(*cfg)
 	})
 	if err != nil {
 		log.Fatal(err)

@@ -4,8 +4,10 @@ import (
 	"crypto/md5"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"log"
 	"mmrp-scraper/internal/telegram"
 	"strings"
+	"sync"
 )
 
 // MMRPScraper ...
@@ -13,38 +15,28 @@ type MMRPScraper struct {
 	lastArrivalCheckSum string
 }
 
+func (s *MMRPScraper) Scrape(cfg Config) {
+	//Initialize checksum from file
+	var once sync.Once
+	once.Do(func() {
+		s.lastArrivalCheckSum = ReadCheckSum("./.checksum_mmrp")
+		log.Println("Checksum for MMRP has been read")
+	})
 
-func GetDocument(url string) *goquery.Document {
-	res, err := http.Get(url)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
-	}
-
-	doc, err := goquery.NewDocumentFromReader(res.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return doc
-}
-
-func (s *MMRPScraper) Scrape() {
 	//Initialize main document
-	doc := GetDocument("http://mmrp.ru/news/74/")
+	doc := GetDocument(fmt.Sprintf("%s/news/74/", cfg.MmrpUrl))
 
 	// Searching the last report
-	fmt.Println("searching new report")
 	a, _ := doc.Find(".row").Find(".t_1").First().Find("a").Attr("href")
 	fmt.Println(a)
 	checksum := fmt.Sprintf("%x", md5.Sum([]byte(a)))
 
 	// Extracting data if report is new, make new checksum
 	if s.lastArrivalCheckSum != checksum {
+		log.Println("New report in MMRP")
 		s.lastArrivalCheckSum = checksum
-		fmt.Println("New report!!!")
-		reportDoc := GetDocument(fmt.Sprintf("http://mmrp.ru%s", a))
+		SaveCheckSum(checksum, "./.checksum_mmrp")
+		reportDoc := GetDocument(fmt.Sprintf("%s%s", cfg.MmrpUrl, a))
 
 		//Getting date of report
 		dateReport := strings.ReplaceAll(strings.ReplaceAll(reportDoc.Find(".date-news").Text(), "\t", ""), "\n", "")
