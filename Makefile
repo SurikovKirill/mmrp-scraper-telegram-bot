@@ -11,4 +11,3 @@ build-image:
 
 start-container:
 	docker run --name telegram-notifier-scraper-bot -p 80:80 --env-file .env telegram-notifier-scraper-bot:v0.1
-

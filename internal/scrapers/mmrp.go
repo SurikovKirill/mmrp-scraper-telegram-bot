@@ -37,33 +37,34 @@ func (s *MMRPScraper) Scrape() {
 
 		//Getting date of report
 		dateReport := strings.ReplaceAll(strings.ReplaceAll(reportDoc.Find(".date-news").Text(), "\t", ""), "\n", "")
-
 		//Extracting headings
 		var headers []string
 		reportDoc.Find(".container.content").Find(".col-lg-12").Has("b").Find("b").Each(func(i int, s *goquery.Selection) {
 			headers = append(headers, strings.TrimSpace(s.Text()))
 		})
-
+		log.Println(headers)
 		//Extracting metadata
 		data := reportDoc.Find(".container.content").Find(".col-lg-12").Has("b").Text()
-
 		//Cleaning off duplicate data
 		for i := range headers {
 			data = strings.ReplaceAll(data, headers[i], "")
 		}
 		data = strings.ReplaceAll(data, dateReport, "")
-
 		//Cleaning off spaces and split data
-		spl := strings.Split(strings.ReplaceAll(strings.TrimSpace(data), " \n ", ""), "\n")
+		d1 := strings.TrimSpace(data)
+		log.Println(d1)
+		d2 := strings.ReplaceAll(d1, " \n ", "")
+		log.Println(d2)
+		spl := strings.Split(d2, ":")
 		for i := range spl {
 			spl[i] = strings.TrimSpace(spl[i])
 			spl[i] = strings.ReplaceAll(spl[i], "\"", "\\\"")
 		}
-
+		log.Println(len(spl[0]))
 		//Mapping data
 		m := make(map[string]string)
 		for i, val := range headers {
-			m[val] = spl[i]
+			m[val] = spl[i+1]
 		}
 
 		telegram.SendMessage(dateReport, m)
