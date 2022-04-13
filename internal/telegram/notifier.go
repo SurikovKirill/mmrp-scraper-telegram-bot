@@ -11,9 +11,6 @@ import (
 // TODO: make text of the message pretty
 // TODO: add logger
 
-type MMRPBot struct {
-}
-
 type Text struct {
 	date string
 	data map[string]string
@@ -24,7 +21,6 @@ func (t *Text) ToString() string {
 	for key, value := range t.data {
 		result += fmt.Sprintf("%s: %s \n", key, value)
 	}
-	fmt.Println(result)
 	return result
 }
 
@@ -33,7 +29,6 @@ func SendMessage(s string, d map[string]string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("create answer")
 	t := Text{s, d}
 	b := []byte(fmt.Sprintf(`{"chat_id": %d, "text": "%s"}`, cfg.ChatId, t.ToString()))
 	tx := bytes.NewReader(b)
@@ -41,7 +36,6 @@ func SendMessage(s string, d map[string]string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
 
 func SendDocument(link string) {
@@ -49,11 +43,9 @@ func SendDocument(link string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("create answer")
-	fmt.Println(link)
-	b := []byte(fmt.Sprintf(`{"chat_id": %d, "text": "%s"}`, cfg.ChatId, strings.TrimSpace(link)))
+	b := []byte(fmt.Sprintf(`{"chat_id": %d, "document": "%s"}`, cfg.ChatId, strings.TrimSpace(link)))
 	tx := bytes.NewReader(b)
-	_, err = http.Post(fmt.Sprintf("%s%s/sendMessage", cfg.Url, cfg.Token), "application/json", tx)
+	_, err = http.Post(fmt.Sprintf("%s%s/sendDocument", cfg.Url, cfg.Token), "application/json", tx)
 	if err != nil {
 		log.Fatal(err)
 	}

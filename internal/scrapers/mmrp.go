@@ -14,59 +14,44 @@ type MMRPScraper struct {
 	lastArrivalCheckSum string
 }
 
-func (s *MMRPScraper) Scrape() {
-	cfg, err := Init()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	//Initialize main document
+func (s *MMRPScraper) Scrape(cfg *Config) {
+	// Initialize main document
 	doc := GetDocument(fmt.Sprintf("%s/news/74/", cfg.MmrpUrl))
-
 	// Searching the last report
-	fmt.Println("searching new report")
-	a, _ := doc.Find(".row").Find(".t_1").First().Find("a").Attr("href")
-	fmt.Println(a)
-	checksum := fmt.Sprintf("%x", md5.Sum([]byte(a)))
+	link, ex := doc.Find(".row").Find(".t_1").First().Find("a").Attr("href")
+	if ex == false {
+		log.Fatal("Link for MMRP doesn't exist")
+	}
+	checksum := fmt.Sprintf("%x", md5.Sum([]byte(link)))
 
-	// Extracting data if report is new, make new checksum
+	// Extracting data, if report is new, make new checksum
 	if s.lastArrivalCheckSum != checksum {
 		s.lastArrivalCheckSum = checksum
-		fmt.Println("New report!!!")
-		reportDoc := GetDocument(fmt.Sprintf("%s%s", cfg.MmrpUrl, a))
-
+		reportDoc := GetDocument(fmt.Sprintf("%s%s", cfg.MmrpUrl, link))
 		//Getting date of report
 		dateReport := strings.ReplaceAll(strings.ReplaceAll(reportDoc.Find(".date-news").Text(), "\t", ""), "\n", "")
-		//Extracting headings
+		//Extracting headers
 		var headers []string
 		reportDoc.Find(".container.content").Find(".col-lg-12").Has("b").Find("b").Each(func(i int, s *goquery.Selection) {
 			headers = append(headers, strings.TrimSpace(s.Text()))
 		})
-		log.Println(headers)
 		//Extracting metadata
 		data := reportDoc.Find(".container.content").Find(".col-lg-12").Has("b").Text()
-		//Cleaning off duplicate data
+		//Cleaning data
 		for i := range headers {
 			data = strings.ReplaceAll(data, headers[i], "")
 		}
 		data = strings.ReplaceAll(data, dateReport, "")
-		//Cleaning off spaces and split data
-		d1 := strings.TrimSpace(data)
-		log.Println(d1)
-		d2 := strings.ReplaceAll(d1, " \n ", "")
-		log.Println(d2)
-		spl := strings.Split(d2, ":")
+		spl := strings.Split(strings.ReplaceAll(strings.TrimSpace(data), " \n ", ""), ":")
 		for i := range spl {
 			spl[i] = strings.TrimSpace(spl[i])
 			spl[i] = strings.ReplaceAll(spl[i], "\"", "\\\"")
 		}
-		log.Println(len(spl[0]))
 		//Mapping data
 		m := make(map[string]string)
 		for i, val := range headers {
 			m[val] = spl[i+1]
 		}
-
 		telegram.SendMessage(dateReport, m)
 	}
 }

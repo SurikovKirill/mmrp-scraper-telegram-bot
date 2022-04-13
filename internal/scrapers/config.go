@@ -2,6 +2,7 @@ package scrapers
 
 import "github.com/spf13/viper"
 
+//Config ...
 type Config struct {
 	MapmUrl string `mapstructure:"mapm_url"`
 	MmrpUrl string `mapstructure:"mmrp_url"`
