@@ -33,7 +33,7 @@ func (s *MMRPScraper) Scrape(cfg *Config) {
 		//Extracting headers
 		var headers []string
 		reportDoc.Find(".container.content").Find(".col-lg-12").Has("b").Find("b").Each(func(i int, s *goquery.Selection) {
-			headers = append(headers, strings.TrimSpace(s.Text()))
+			headers = append(headers, strings.ReplaceAll(strings.TrimSpace(s.Text()), ":", ""))
 		})
 		//Extracting metadata
 		data := reportDoc.Find(".container.content").Find(".col-lg-12").Has("b").Text()
