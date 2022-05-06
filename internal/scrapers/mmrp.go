@@ -3,10 +3,11 @@ package scrapers
 import (
 	"crypto/md5"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	"log"
 	"mmrp-scraper/internal/telegram"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 // MMRPScraper ...
@@ -19,14 +20,17 @@ func (s *MMRPScraper) Scrape(cfg *Config) {
 	doc := GetDocument(fmt.Sprintf("%s/news/74/", cfg.MmrpUrl))
 	// Searching the last report
 	link, ex := doc.Find(".row").Find(".t_1").First().Find("a").Attr("href")
-	if ex == false {
+	if !ex {
 		log.Fatal("Link for MMRP doesn't exist")
 	}
 	checksum := fmt.Sprintf("%x", md5.Sum([]byte(link)))
-
+	if s.lastArrivalCheckSum == "" {
+		s.lastArrivalCheckSum = GetInfoFromFile("lastInfoMmrp")
+	}
 	// Extracting data, if report is new, make new checksum
 	if s.lastArrivalCheckSum != checksum {
 		s.lastArrivalCheckSum = checksum
+		ChangeCheckSumFile("lastInfoMmrp", checksum)
 		reportDoc := GetDocument(fmt.Sprintf("%s%s", cfg.MmrpUrl, link))
 		//Getting date of report
 		dateReport := strings.ReplaceAll(strings.ReplaceAll(reportDoc.Find(".date-news").Text(), "\t", ""), "\n", "")

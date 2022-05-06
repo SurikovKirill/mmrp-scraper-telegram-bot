@@ -8,9 +8,6 @@ import (
 	"strings"
 )
 
-// TODO: make text of the message pretty
-// TODO: add logger
-
 type Text struct {
 	date string
 	data map[string]string
