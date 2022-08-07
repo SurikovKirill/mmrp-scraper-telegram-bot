@@ -1,13 +1,16 @@
 package scrapers
 
-import "github.com/spf13/viper"
+import (
+	"github.com/spf13/viper"
+)
 
-//Config ...
+//Config Configure URLs for scrappers
 type Config struct {
 	MapmUrl string `mapstructure:"mapm_url"`
 	MmrpUrl string `mapstructure:"mmrp_url"`
 }
 
+//Initialize function from YAML config
 func Init() (*Config, error) {
 	viper.AddConfigPath("configs")
 	viper.SetConfigName("main")
