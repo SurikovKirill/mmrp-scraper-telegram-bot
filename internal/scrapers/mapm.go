@@ -70,6 +70,7 @@ func (s *MAPMScraper) ScrapeWithRod() {
 	time.Sleep(time.Millisecond * 5000)
 	// Дожидаемся полной загрузки страницы и переносим данные в html файл
 	data := tp.MustElement("#dvShipsResults > div.center-block.table-responsive").MustHTML()
+	tp.MustPDF("temp.pdf")
 	f, err := os.Create("tmp.html")
 	if err != nil {
 		log.Println(err)

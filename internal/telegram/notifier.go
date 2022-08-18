@@ -30,14 +30,14 @@ func (t *Text) ToString() string {
 func SendMessage(s string, d map[string]string) {
 	cfg, err := Init()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal()
 	}
 	t := Text{s, d}
 	b := []byte(fmt.Sprintf(`{"chat_id": %d, "text": "%s"}`, cfg.ChatId, t.ToString()))
 	tx := bytes.NewReader(b)
 	_, err = http.Post(fmt.Sprintf("%s%s/sendMessage", cfg.Url, cfg.Token), "application/json", tx)
 	if err != nil {
-		log.Print(err)
+		log.WithFields(log.Fields{"package": "scrapers", "function": "SendMessage", "error": err}).Error(err)
 	}
 }
 
@@ -74,14 +74,14 @@ func SendDocumentRod() {
 	payload := &bytes.Buffer{}
 	writer := multipart.NewWriter(payload)
 	_ = writer.WriteField("chat_id", strconv.Itoa(cfg.ChatId))
-	file, errFile2 := os.Open("tmp.html")
+	file, errFile2 := os.Open("temp.pdf")
 	if errFile2 != nil {
 		fmt.Println(errFile2, "zzz")
 		return
 	}
 
 	defer file.Close()
-	part2, errFile2 := writer.CreateFormFile("document", filepath.Base("tmp.html"))
+	part2, errFile2 := writer.CreateFormFile("document", filepath.Base("temp.pdf"))
 	_, errFile2 = io.Copy(part2, file)
 	if errFile2 != nil {
 		fmt.Println(errFile2, "ggg")
