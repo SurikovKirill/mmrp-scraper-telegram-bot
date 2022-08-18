@@ -42,8 +42,8 @@ func run() error {
 		sMmrp.Scrape(cs)
 	})
 
-	// Скраппинг MAPM каждые 40 минут
-	scheduler.Every(40).Minutes().Do(func() {
+	// Скраппинг MAPM каждые 10 часов
+	scheduler.Every(10).Hours().Do(func() {
 		log.Println("Start MAPM task")
 		sMapm.ScrapeWithRod()
 	})
