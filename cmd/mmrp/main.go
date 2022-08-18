@@ -1,12 +1,11 @@
 package main
 
 import (
+	"log"
 	"mmrp-scraper/internal/scrapers"
-	"os"
 	"time"
 
 	"github.com/go-co-op/gocron"
-	log "github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -27,36 +26,26 @@ func main() {
 // 9. Написать тесты
 
 func run() error {
-	// Открыть файл для сбора логов
-	f, err := os.OpenFile("scraper.log", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
-	if err != nil {
-		return err
-	}
-	log.SetOutput(f)
-
 	// Инициализация парсеров
 	sMmrp := scrapers.MMRPScraper{}
-	// sMapm := scrapers.MAPMScraper{}
+	sMapm := scrapers.MAPMScraper{}
 	cs, err := scrapers.Init()
 	if err != nil {
-		log.WithFields(log.Fields{"package": "main", "function": "run", "error": err}).Error("Error in config")
-		return err
+		log.Fatal(err, "Error in configs for scrapper")
 	}
-	f.Close()
-
 	// Создание кронов
 	scheduler := gocron.NewScheduler(time.UTC)
 
 	// Скраппинг MMRP каждые 15 минут
 	scheduler.Every(15).Minutes().Do(func() {
-		log.New().Print("Start MMRP task")
+		log.Println("Start MMRP task")
 		sMmrp.Scrape(cs)
 	})
 
 	// Скраппинг MAPM каждые 40 минут
 	scheduler.Every(40).Minutes().Do(func() {
-		log.New().Print("Start MAPM task")
-		// sMapm.ScrapeTable(cs)
+		log.Println("Start MAPM task")
+		sMapm.ScrapeWithRod()
 	})
 	scheduler.StartBlocking()
 	return nil
