@@ -10,6 +10,9 @@ import (
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
+	"github.com/go-rod/rod/lib/proto"
+	"github.com/go-rod/rod/lib/utils"
+	"github.com/ysmood/gson"
 )
 
 // MAPMScraper Structure for MAPM
@@ -70,14 +73,19 @@ func (s *MAPMScraper) ScrapeWithRod() {
 	time.Sleep(time.Millisecond * 5000)
 	// Дожидаемся полной загрузки страницы и переносим данные в html файл
 	data := tp.MustElement("#dvShipsResults > div.center-block.table-responsive").MustHTML()
-	tp.MustPDF("temp.pdf")
+	pdf, _ := tp.PDF(&proto.PagePrintToPDF{
+		PaperWidth:  gson.Num(25),
+		PaperHeight: gson.Num(11),
+		PageRanges:  "1-10",
+	})
+	_ = utils.OutputFile("temp.pdf", pdf)
 	f, err := os.Create("tmp.html")
 	if err != nil {
 		log.Println(err)
 	}
 	defer f.Close()
 	f.WriteString(data)
-	time.Sleep(time.Millisecond * 5000)
+	time.Sleep(time.Millisecond * 3000)
 	//Отправляем данные
 	telegram.SendDocumentRod()
 }
