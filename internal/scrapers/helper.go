@@ -19,6 +19,7 @@ func GetDocument(url string) *goquery.Document {
 	if err != nil {
 		log.WithFields(log.Fields{"package": "scrapers", "function": "GetDocument", "error": err}).Error("Bad request")
 	}
+	log.Println(res.Status)
 	if res.StatusCode != 200 {
 		log.WithFields(log.Fields{"package": "scrapers", "function": "GetDocument", "error": err}).Error("Status code error: %d %s", res.StatusCode, res.Status)
 	}
@@ -132,7 +133,3 @@ func GetDocumentWithCookie(url string) (*goquery.Document, string) {
 	}
 	return doc, res.Cookies()[0].Value
 }
-
-// func CustomGetWithCookie(url string) (*goquery.Document, string) {
-
-// }

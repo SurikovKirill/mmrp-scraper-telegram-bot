@@ -22,6 +22,7 @@ type MAPMScraper struct {
 
 // Scrape Scraping MAPM
 // TEMPORARILY DEPRECATED
+// TODO: отрефакторить модуль
 func (s *MAPMScraper) Scrape(cfg *Config) {
 	// Получение документа
 	doc := GetDocument(fmt.Sprintf("%s/Port/Murmansk", cfg.MapmUrl))
@@ -42,14 +43,13 @@ func (s *MAPMScraper) Scrape(cfg *Config) {
 	}
 }
 
+// TODO: вынести в переменные среды логопас
 const (
 	login    = "NaLogMo"
 	password = "dfm2jslp"
 )
 
 // ScrapeWithRod Scraping MAPM using rod-driver
-// TODO: make config with logopass for mapm
-// TODO: make helper function for html-info from mapm
 func (s *MAPMScraper) ScrapeWithRod() {
 	// Подключение к движку
 	path, h := launcher.LookPath()

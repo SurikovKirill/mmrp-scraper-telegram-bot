@@ -32,6 +32,7 @@ func Init() (*Config, error) {
 	return &cfg, nil
 }
 
+// TODO: реализовать запуск для тестов и для продакшена
 func parseEnv(cfg *Config) error {
 	// For testing
 	os.Setenv("TOKEN", "2102541865:AAFdbDr_mclUw_aCLXadmn1aO9T6sLR3WcQ")

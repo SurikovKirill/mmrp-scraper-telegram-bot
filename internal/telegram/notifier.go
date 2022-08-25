@@ -27,6 +27,8 @@ func (t *Text) ToString() string {
 	return result
 }
 
+// TODO: рефакторинг модуля
+
 func SendMessage(s string, d map[string]string) {
 	cfg, err := Init()
 	if err != nil {
