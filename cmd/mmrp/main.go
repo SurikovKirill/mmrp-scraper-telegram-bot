@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"mmrp-scraper/internal/scrapers"
+	"mmrp-scraper/internal/telegram"
 	"time"
 
 	"github.com/go-co-op/gocron"
@@ -15,7 +16,8 @@ func main() {
 }
 
 // TODO:
-// 2. Создать эндпоинт, через который можно пинговать сервер и проверять работу (сделать так, чтобы при пинге выдавались логи)
+// 2. Создать эндпоинт, через который можно пинговать сервер и проверять работу
+// (сделать так, чтобы при пинге выдавались логи)
 // 3. Настроить graceful shutdown
 // 4. Через профилировщик проверить на ненужные аллокации, оптимизация кода
 // 5. Оптимизация докер-контейнера
@@ -25,27 +27,32 @@ func main() {
 // 9. Написать тесты
 // 10. Настроить репозиторий на гитхабе
 // 11. Отрефакторить в соотвествии с 12-факторной методологией
+
 func run() error {
 	// Инициализация парсеров
 	sMmrp := scrapers.MMRPScraper{}
 	sMapm := scrapers.MAPMScraper{}
-	cs, err := scrapers.Init()
-	if err != nil {
-		log.Fatal(err, "Error in configs for scrapper")
+	// Инициализация конфига mapm логопас
+	if err := sMapm.Init(); err != nil {
+		return err
 	}
+	// Инициализация конфига телеграма
+	ct, err := telegram.Init()
+	if err != nil {
+		return err
+	}
+
 	// Создание кронов
 	scheduler := gocron.NewScheduler(time.UTC)
-
 	// Скраппинг MMRP каждые 15 минут
 	scheduler.Every(15).Minutes().Do(func() {
 		log.Println("Start MMRP task")
-		sMmrp.Scrape(cs)
+		sMmrp.Scrape(ct)
 	})
-
 	// Скраппинг MAPM каждые 10 часов
-	scheduler.Every(10).Hours().Do(func() {
+	scheduler.Every(1).Day().Do(func() {
 		log.Println("Start MAPM task")
-		sMapm.ScrapeWithRod()
+		sMapm.ScrapeWithRod(ct)
 	})
 	scheduler.StartBlocking()
 	return nil
