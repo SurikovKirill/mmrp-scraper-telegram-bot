@@ -8,23 +8,12 @@ import (
 )
 
 type Config struct {
-	ChatId int
+	ChatID int
 	Token  string
-	Url    string `mapstructure:"telegram_bot_url"`
 }
 
 func Init() (*Config, error) {
-	viper.AddConfigPath("configs")
-	viper.SetConfigName("main")
-	if err := viper.ReadInConfig(); err != nil {
-		return nil, err
-	}
-
 	var cfg Config
-	if err := viper.Unmarshal(&cfg); err != nil {
-		return nil, err
-	}
-
 	if err := parseEnv(&cfg); err != nil {
 		return nil, err
 	}
@@ -32,11 +21,11 @@ func Init() (*Config, error) {
 	return &cfg, nil
 }
 
-// TODO: реализовать запуск для тестов и для продакшена
 func parseEnv(cfg *Config) error {
 	// For testing
 	os.Setenv("TOKEN", "2102541865:AAFdbDr_mclUw_aCLXadmn1aO9T6sLR3WcQ")
 	os.Setenv("CHAT_ID", "-1001559971169")
+
 	if err := viper.BindEnv("token"); err != nil {
 		return err
 	}
@@ -48,6 +37,7 @@ func parseEnv(cfg *Config) error {
 	if err != nil {
 		return err
 	}
-	cfg.ChatId = s
+	cfg.ChatID = s
+
 	return nil
 }
