@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"mmrp-scraper/internal/scrapers"
 	"mmrp-scraper/internal/telegram"
@@ -41,7 +40,6 @@ func run() error {
 	}
 	// Создание кронов
 	log.Println("Starting scheduler")
-	fmt.Println(time.Local)
 	scheduler := gocron.NewScheduler(time.Local)
 	// Скраппинг MMRP каждые 15 минут
 	scheduler.Every(15).Minutes().Do(func() {

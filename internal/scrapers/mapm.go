@@ -3,7 +3,6 @@ package scrapers
 import (
 	"log"
 	"mmrp-scraper/internal/telegram"
-	"os"
 	"time"
 
 	"github.com/go-rod/rod"
@@ -22,8 +21,8 @@ type MAPMScraper struct {
 
 // Init initialize login and password for MAPM from environment
 func (s *MAPMScraper) Init() error {
-	os.Setenv("LOGIN", "NaLogMo")
-	os.Setenv("PASSWORD", "dfm2jslp")
+	// os.Setenv("LOGIN", "NaLogMo")
+	// os.Setenv("PASSWORD", "dfm2jslp")
 	if err := viper.BindEnv("login"); err != nil {
 		return err
 	}
@@ -54,19 +53,14 @@ func (s *MAPMScraper) ScrapeWithRod(t *telegram.Config) {
 	lp.MustElement("#UserName").MustInput(s.login)
 	lp.MustElement("#Password").MustInput(s.password)
 	lp.MustElement("#loginForm > form > div:nth-child(7) > div > input").MustClick()
-	log.Println("Working with MAPM ... 1")
 	br.MustPage("http://mapm.ru/")
 	// Переход по ссылке на таблицу с данными, формирование запроса
 	tp := br.MustPage("http://mapm.ru/Vts")
-	log.Println("Working with MAPM ... 2")
 	time.Sleep(time.Millisecond * 5000)
-	log.Println("Working with MAPM ... 3")
 	tp.MustElement("#ddlVtsPort").MustSelect("Мурманск")
 	tp.MustElement("#wrapper > div:nth-child(4) > div > div:nth-child(3) > div > div > button").MustClick()
-	log.Println("Working with MAPM ... 4")
-	time.Sleep(time.Millisecond * 10000)
+	time.Sleep(time.Millisecond * 5000)
 	// Дожидаемся полной загрузки страницы и переносим данные в html файл
-	log.Println("Working with MAPM ... 5")
 	tp.MustElement("#dvShipsResults > div.center-block.table-responsive")
 	log.Println("Making PDF file ...")
 	pdf, err := tp.PDF(&proto.PagePrintToPDF{
