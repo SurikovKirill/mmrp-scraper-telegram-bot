@@ -33,6 +33,7 @@ const (
 )
 
 func SendDocumentRod(c *Config) {
+	log.Println("Send MAPM data to chat")
 	url := fmt.Sprintf("%s%s/sendDocument", telegramBotAPIURL, c.Token)
 	method := "POST"
 	payload := &bytes.Buffer{}
