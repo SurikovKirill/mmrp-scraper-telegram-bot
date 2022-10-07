@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -29,32 +28,9 @@ func SendMessage(s string, d map[string]string, c *Config) {
 	defer res.Body.Close()
 }
 
-// func SendDocumentRod(c *Config) {
-// 	log.Println("Send MAPM data to chat")
-// 	payload := &bytes.Buffer{}
-// 	writer := multipart.NewWriter(payload)
-// 	defer writer.Close()
-// 	if err := writer.WriteField("chat_id", strconv.Itoa(c.ChatID)); err != nil {
-// 		log.Println(err)
-// 	}
-// 	file, err := os.Open(documentName)
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-// 	defer file.Close()
-// 	buff, err := writer.CreateFormFile("document", filepath.Base(documentName))
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-// 	if _, err := io.Copy(buff, file); err != nil {
-// 		log.Println(err)
-// 	}
-// 	res, err := http.Post(fmt.Sprintf("%s%s/sendDocument", telegramBotAPIURL, c.Token), "multipart/form-data", payload)
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-// 	defer res.Body.Close()
-// }
+const (
+	filename = "temp.pdf"
+)
 
 func SendDocumentRod(c *Config) {
 	url := fmt.Sprintf("%s%s/sendDocument", telegramBotAPIURL, c.Token)
@@ -62,31 +38,28 @@ func SendDocumentRod(c *Config) {
 	payload := &bytes.Buffer{}
 	writer := multipart.NewWriter(payload)
 	_ = writer.WriteField("chat_id", strconv.Itoa(c.ChatID))
-	file, errFile2 := os.Open("temp.pdf")
-	if errFile2 != nil {
-		log.Println(errFile2)
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer file.Close()
+	part, err := writer.CreateFormFile("document", filepath.Base(filename))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if _, err := io.Copy(part, file); err != nil {
+		log.Println(err)
 		return
 	}
 
-	defer file.Close()
-	part2, errFile2 := writer.CreateFormFile("document", filepath.Base("temp.pdf"))
-	if errFile2 != nil {
-		log.Println(errFile2)
-		return
-	}
-	_, errFile3 := io.Copy(part2, file)
-	if errFile3 != nil {
-		log.Println(errFile3)
-		return
-	}
-	err := writer.Close()
-	if err != nil {
+	if err := writer.Close(); err != nil {
 		log.Println(err)
 		return
 	}
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, payload)
-
 	if err != nil {
 		log.Println(err)
 		return
@@ -98,11 +71,4 @@ func SendDocumentRod(c *Config) {
 		return
 	}
 	defer res.Body.Close()
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	log.Println(string(body))
 }
