@@ -38,8 +38,9 @@ func run() error {
 	if err != nil {
 		return err
 	}
-
 	// Создание кронов
+	log.Println("Starting scheduler")
+
 	scheduler := gocron.NewScheduler(time.UTC)
 	// Скраппинг MMRP каждые 15 минут
 	scheduler.Every(15).Minutes().Do(func() {

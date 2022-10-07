@@ -18,7 +18,6 @@ RUN apk add --no-cache chromium
 WORKDIR /root/
 
 COPY --from=0 /mmrp-scraper/.bin/bot .
-COPY --from=0 /mmrp-scraper/configs configs/
 
 EXPOSE 80
 

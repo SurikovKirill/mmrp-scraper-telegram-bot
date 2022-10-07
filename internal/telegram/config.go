@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"log"
 	"os"
 	"strconv"
 
@@ -17,7 +18,7 @@ func Init() (*Config, error) {
 	if err := parseEnv(&cfg); err != nil {
 		return nil, err
 	}
-
+	log.Println("Telegram config done")
 	return &cfg, nil
 }
 
