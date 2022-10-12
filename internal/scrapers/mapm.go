@@ -49,7 +49,6 @@ func (s *MAPMScraper) ScrapeWithRod(t *telegram.Config) {
 	log.Println("Working with MAPM ...")
 	lp := br.MustPage("http://mapm.ru/Account/Login?returnUrl=%2F")
 	time.Sleep(time.Millisecond * 5000)
-	log.Println(s.login, s.password)
 	lp.MustElement("#UserName").MustInput(s.login)
 	lp.MustElement("#Password").MustInput(s.password)
 	lp.MustElement("#loginForm > form > div:nth-child(7) > div > input").MustClick()
