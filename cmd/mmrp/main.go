@@ -16,20 +16,14 @@ func main() {
 }
 
 // TODO:
-// 2. Создать эндпоинт, через который можно пинговать сервер и проверять работу
-// (сделать так, чтобы при пинге выдавались логи)
-// 3. Настроить graceful shutdown
-// 5. Оптимизация докер-контейнера
-// 8. Настроить CI/CD
-// 9. Написать тесты
-// 10. Настроить репозиторий на гитхабе
-// 11. Отрефакторить в соотвествии с 12-факторной методологией
+// 1. Оптимизация докер-контейнера
+// 2. Настроить CI/CD
 
 func run() error {
 	// Инициализация парсеров
 	sMmrp := scrapers.MMRPScraper{}
 	sMapm := scrapers.MAPMScraper{}
-	// Инициализация конфига mapm логопас
+	// Инициализация конфига mapm (Логопас)
 	if err := sMapm.Init(); err != nil {
 		return err
 	}
@@ -47,7 +41,7 @@ func run() error {
 		sMmrp.Scrape(ct)
 	})
 	// Скраппинг MAPM каждые 10 часов
-	scheduler.Cron("15 7,14 * * *").Do(func() {
+	scheduler.Cron("15 10,17 * * *").Do(func() {
 		log.Println("Start MAPM task")
 		sMapm.ScrapeWithRod(ct)
 	})

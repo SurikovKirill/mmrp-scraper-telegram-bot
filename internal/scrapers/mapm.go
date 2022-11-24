@@ -21,8 +21,6 @@ type MAPMScraper struct {
 
 // Init initialize login and password for MAPM from environment
 func (s *MAPMScraper) Init() error {
-	// os.Setenv("LOGIN", "NaLogMo")
-	// os.Setenv("PASSWORD", "dfm2jslp")
 	if err := viper.BindEnv("login"); err != nil {
 		return err
 	}
@@ -45,8 +43,18 @@ func (s *MAPMScraper) ScrapeWithRod(t *telegram.Config) {
 	}
 	u := launcher.New().Bin(path).MustLaunch()
 	br := rod.New().ControlURL(u).MustConnect()
+	defer func() {
+		if err := br.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 	// Авторизация на сайте
 	log.Println("Working with MAPM ...")
+	if err := rod.Try(func() { br.MustPage("http://mapm.ru/Account/Login?returnUrl=%2F") }); err != nil {
+		log.Println("Problems with connection to mapm", err)
+		return
+	}
+	log.Println("Connected")
 	lp := br.MustPage("http://mapm.ru/Account/Login?returnUrl=%2F")
 	time.Sleep(time.Millisecond * 5000)
 	lp.MustElement("#UserName").MustInput(s.login)
@@ -70,8 +78,7 @@ func (s *MAPMScraper) ScrapeWithRod(t *telegram.Config) {
 	if err != nil {
 		log.Println(err)
 	}
-	err = utils.OutputFile("temp.pdf", pdf)
-	if err != nil {
+	if err := utils.OutputFile("temp.pdf", pdf); err != nil {
 		log.Println(err)
 	}
 	time.Sleep(time.Millisecond * 3000)
