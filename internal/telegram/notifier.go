@@ -14,7 +14,7 @@ import (
 
 const (
 	telegramBotAPIURL = "https://api.telegram.org/bot"
-	documentName      = "temp.pdf"
+	filename          = "temp.pdf"
 )
 
 func SendMessage(s string, d map[string]string, c *Config) {
@@ -28,14 +28,8 @@ func SendMessage(s string, d map[string]string, c *Config) {
 	defer res.Body.Close()
 }
 
-const (
-	filename = "temp.pdf"
-)
-
 func SendDocumentRod(c *Config) {
 	log.Println("Send MAPM data to chat")
-	url := fmt.Sprintf("%s%s/sendDocument", telegramBotAPIURL, c.Token)
-	method := "POST"
 	payload := &bytes.Buffer{}
 	writer := multipart.NewWriter(payload)
 	_ = writer.WriteField("chat_id", strconv.Itoa(c.ChatID))
@@ -60,16 +54,14 @@ func SendDocumentRod(c *Config) {
 		return
 	}
 	client := &http.Client{}
-	req, err := http.NewRequest(method, url, payload)
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s%s/sendDocument", telegramBotAPIURL, c.Token), payload)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	res, err := client.Do(req)
-	if err != nil {
+	if _, err := client.Do(req); err != nil {
 		log.Println(err)
 		return
 	}
-	defer res.Body.Close()
 }

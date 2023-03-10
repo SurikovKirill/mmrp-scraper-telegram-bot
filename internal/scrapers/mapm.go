@@ -33,9 +33,15 @@ func (s *MAPMScraper) Init() error {
 	return nil
 }
 
+const (
+	loginPage = "http://mapm.ru/Account/Login?returnUrl=%2F"
+	mainPage  = "http://mapm.ru/"
+	tablePage = "http://mapm.ru/Vts"
+	filename  = "temp.pdf"
+)
+
 // ScrapeWithRod Scraping MAPM using rod-driver
 func (s *MAPMScraper) ScrapeWithRod(t *telegram.Config) {
-	// Подключение к движку
 	log.Println("Connecting to chromium ...")
 	path, h := launcher.LookPath()
 	if !h {
@@ -48,26 +54,22 @@ func (s *MAPMScraper) ScrapeWithRod(t *telegram.Config) {
 			log.Println(err)
 		}
 	}()
-	// Авторизация на сайте
 	log.Println("Working with MAPM ...")
-	if err := rod.Try(func() { br.MustPage("http://mapm.ru/Account/Login?returnUrl=%2F") }); err != nil {
+	if err := rod.Try(func() { br.MustPage(loginPage) }); err != nil {
 		log.Println("Problems with connection to mapm", err)
 		return
 	}
-	log.Println("Connected")
-	lp := br.MustPage("http://mapm.ru/Account/Login?returnUrl=%2F")
+	lp := br.MustPage(loginPage)
 	time.Sleep(time.Millisecond * 5000)
 	lp.MustElement("#UserName").MustInput(s.login)
 	lp.MustElement("#Password").MustInput(s.password)
 	lp.MustElement("#loginForm > form > div:nth-child(7) > div > input").MustClick()
-	br.MustPage("http://mapm.ru/")
-	// Переход по ссылке на таблицу с данными, формирование запроса
-	tp := br.MustPage("http://mapm.ru/Vts")
+	br.MustPage(mainPage)
+	tp := br.MustPage(tablePage)
 	time.Sleep(time.Millisecond * 5000)
 	tp.MustElement("#ddlVtsPort").MustSelect("Мурманск")
 	tp.MustElement("#wrapper > div:nth-child(4) > div > div:nth-child(3) > div > div > button").MustClick()
 	time.Sleep(time.Millisecond * 5000)
-	// Дожидаемся полной загрузки страницы и переносим данные в html файл
 	tp.MustElement("#dvShipsResults > div.center-block.table-responsive")
 	log.Println("Making PDF file ...")
 	pdf, err := tp.PDF(&proto.PagePrintToPDF{
@@ -78,10 +80,8 @@ func (s *MAPMScraper) ScrapeWithRod(t *telegram.Config) {
 	if err != nil {
 		log.Println(err)
 	}
-	if err := utils.OutputFile("temp.pdf", pdf); err != nil {
+	if err := utils.OutputFile(filename, pdf); err != nil {
 		log.Println(err)
 	}
-	time.Sleep(time.Millisecond * 3000)
-	// Отправляем данные
 	telegram.SendDocumentRod(t)
 }

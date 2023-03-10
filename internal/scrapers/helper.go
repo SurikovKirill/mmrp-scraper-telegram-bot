@@ -12,7 +12,6 @@ import (
 func GetDocument(url string) (*goquery.Document, error) {
 	res, err := http.Get(url)
 	if err != nil {
-		log.Println("Bad request for getting document", url)
 		return nil, err
 	}
 	doc, err := goquery.NewDocumentFromReader(res.Body)

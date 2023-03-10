@@ -22,10 +22,6 @@ func Init() (*Config, error) {
 }
 
 func parseEnv(cfg *Config) error {
-	// For testing
-	// os.Setenv("TOKEN", "2102541865:AAFdbDr_mclUw_aCLXadmn1aO9T6sLR3WcQ")
-	// os.Setenv("CHAT_ID", "-1001559971169")
-
 	if err := viper.BindEnv("token"); err != nil {
 		return err
 	}
