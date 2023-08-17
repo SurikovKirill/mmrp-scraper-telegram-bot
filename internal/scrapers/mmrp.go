@@ -17,7 +17,7 @@ type MMRPScraper struct {
 
 const (
 	lastInfoMmrp = "lastInfoMmrp"
-	urlMmrp      = "http://mmrp.ru"
+	urlMmrp      = "https://mmrp.ru"
 )
 
 // Scrape ...

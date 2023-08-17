@@ -50,19 +50,19 @@ func (s *MAPMScraper) ScrapeWithRod(t *telegram.Config) {
 	}()
 	// Авторизация на сайте
 	log.Println("Working with MAPM ...")
-	if err := rod.Try(func() { br.MustPage("http://mapm.ru/Account/Login?returnUrl=%2F") }); err != nil {
+	if err := rod.Try(func() { br.MustPage("https://mapm.ru/Account/Login?returnUrl=%2F") }); err != nil {
 		log.Println("Problems with connection to mapm", err)
 		return
 	}
 	log.Println("Connected")
-	lp := br.MustPage("http://mapm.ru/Account/Login?returnUrl=%2F")
+	lp := br.MustPage("https://mapm.ru/Account/Login?returnUrl=%2F")
 	time.Sleep(time.Millisecond * 5000)
 	lp.MustElement("#UserName").MustInput(s.login)
 	lp.MustElement("#Password").MustInput(s.password)
 	lp.MustElement("#loginForm > form > div:nth-child(7) > div > input").MustClick()
-	br.MustPage("http://mapm.ru/")
+	br.MustPage("https://mapm.ru/")
 	// Переход по ссылке на таблицу с данными, формирование запроса
-	tp := br.MustPage("http://mapm.ru/Vts")
+	tp := br.MustPage("https://mapm.ru/Vts")
 	time.Sleep(time.Millisecond * 5000)
 	tp.MustElement("#ddlVtsPort").MustSelect("Мурманск")
 	tp.MustElement("#wrapper > div:nth-child(4) > div > div:nth-child(3) > div > div > button").MustClick()
