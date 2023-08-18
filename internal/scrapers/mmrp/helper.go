@@ -1,4 +1,4 @@
-package scrapers
+package mmrp
 
 import (
 	"log"
@@ -41,6 +41,21 @@ func GetInfoFromFile(filename string) string {
 	return ""
 }
 
+// ChangeCheckSumFile change or save hash-checksum in file
+func ChangeCheckSumFile(filename string, checksum string) {
+	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	if err != nil {
+		log.Println(err)
+	}
+	defer file.Close()
+	if err := os.Truncate(filename, 0); err != nil {
+		log.Println(err)
+	}
+	if _, err := file.WriteString(checksum); err != nil {
+		log.Println(err)
+	}
+}
+
 func checkFileExist(filename string) bool {
 	_, err := os.Stat(filename)
 	return !os.IsNotExist(err)
@@ -66,19 +81,4 @@ func readCheckSumFromFile(filename string) string {
 	data := make([]byte, 200)
 	n, _ := file.Read(data)
 	return string(data[:n])
-}
-
-// ChangeCheckSumFile change or save hash-checksum in file
-func ChangeCheckSumFile(filename string, checksum string) {
-	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
-	if err != nil {
-		log.Println(err)
-	}
-	defer file.Close()
-	if err := os.Truncate(filename, 0); err != nil {
-		log.Println(err)
-	}
-	if _, err := file.WriteString(checksum); err != nil {
-		log.Println(err)
-	}
 }

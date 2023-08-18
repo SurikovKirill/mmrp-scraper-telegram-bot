@@ -1,4 +1,4 @@
-package scrapers
+package mapm
 
 import (
 	"log"
@@ -13,14 +13,14 @@ import (
 	"github.com/ysmood/gson"
 )
 
-// MAPMScraper Structure for MAPM
-type MAPMScraper struct {
+// Scraper Structure for MAPM
+type Scraper struct {
 	login    string
 	password string
 }
 
 // Init initialize login and password for MAPM from environment
-func (s *MAPMScraper) Init() error {
+func (s *Scraper) Init() error {
 	if err := viper.BindEnv("login"); err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func (s *MAPMScraper) Init() error {
 }
 
 // ScrapeWithRod Scraping MAPM using rod-driver
-func (s *MAPMScraper) ScrapeWithRod(t *telegram.Config) {
+func (s *Scraper) ScrapeWithRod(t *telegram.Config) {
 	// Подключение к движку
 	log.Println("Connecting to chromium ...")
 	path, h := launcher.LookPath()
@@ -55,19 +55,26 @@ func (s *MAPMScraper) ScrapeWithRod(t *telegram.Config) {
 		return
 	}
 	log.Println("Connected")
+	br.MustPage("https://mapm.ru/Account/Login?returnUrl=%2F").MustWaitStable().MustScreenshot("a.png")
 	lp := br.MustPage("https://mapm.ru/Account/Login?returnUrl=%2F")
 	time.Sleep(time.Millisecond * 5000)
-	lp.MustElement("#UserName").MustInput(s.login)
-	lp.MustElement("#Password").MustInput(s.password)
+	lp.MustElement("#UserName").MustInput("NaLogMo")
+	lp.MustElement("#Password").MustInput("dfm2jslp")
+	lp.MustScreenshot("c.png")
 	lp.MustElement("#loginForm > form > div:nth-child(7) > div > input").MustClick()
-	br.MustPage("https://mapm.ru/")
+	time.Sleep(time.Millisecond * 20000)
+	br.MustPage("https://mapm.ru/").MustWaitStable().MustScreenshot("b.png")
+	log.Println("dsdadasdas")
 	// Переход по ссылке на таблицу с данными, формирование запроса
 	tp := br.MustPage("https://mapm.ru/Vts")
+	tp.MustScreenshot("e.png")
 	time.Sleep(time.Millisecond * 5000)
 	tp.MustElement("#ddlVtsPort").MustSelect("Мурманск")
+	tp.MustWaitStable().MustScreenshot("abc.png")
 	tp.MustElement("#wrapper > div:nth-child(4) > div > div:nth-child(3) > div > div > button").MustClick()
-	time.Sleep(time.Millisecond * 5000)
+	time.Sleep(time.Millisecond * 20000)
 	// Дожидаемся полной загрузки страницы и переносим данные в html файл
+	tp.MustWaitStable().MustScreenshot("abcd.png")
 	tp.MustElement("#dvShipsResults > div.center-block.table-responsive")
 	log.Println("Making PDF file ...")
 	pdf, err := tp.PDF(&proto.PagePrintToPDF{

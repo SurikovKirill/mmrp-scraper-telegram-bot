@@ -17,10 +17,15 @@ const (
 	documentName      = "temp.pdf"
 )
 
-func SendMessage(s string, d map[string]string, c *Config) {
+func SendMessage(report []string, c *Config) {
 	log.Println("Send MMRP data to chat")
-	t := Text{s, d}
-	tb := bytes.NewReader([]byte(fmt.Sprintf(`{"chat_id": %d, "text": "%s"}`, c.ChatID, t.ToString())))
+
+	var msg string
+	for i := range report {
+		msg += fmt.Sprintf("%s \n", report[i])
+	}
+
+	tb := bytes.NewReader([]byte(fmt.Sprintf(`{"chat_id": %d, "text": "%s"}`, c.ChatID, msg)))
 	res, err := http.Post(fmt.Sprintf("%s%s/sendMessage", telegramBotAPIURL, c.Token), "application/json", tb)
 	if err != nil {
 		log.Println(err)
